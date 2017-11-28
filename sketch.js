@@ -3,13 +3,14 @@ var serial; // variable to hold an instance of the serialport library
 var portName = '/dev/cu.usbmodem1411'; // fill in your serial port name here
 
 // Variable for array of videos
-var videoCrack = [];
+var stateVideo = 1;
+var videos = [];
 var indexVideo = 0;
 
-var playing = false;
-var xPos = 0;
-var yPos = 0;
-var zPos = 0;
+// Variable for sensor inputs
+var valueSensorTouchLeft = 0;
+var valueSensorTouchRight = 0;
+var valueSensorDistance = 0;
 
 // Cloud Texts
 var textbox = []; // array of Jitter objects
@@ -21,20 +22,20 @@ let other = true;
 // Mic Input
 var mic;
 
-// Count the video and touched variable when the sensor is touched
-// let touched = false; 
-// let vidCounter = 0;
 
-// let playingVid = false;
-
+// Preload function to load texts from JSON
 function preload(){
   data = loadJSON("phrases.json"); 
 }
 
+// Setup function
+// to setup serial communication, load video, load data, and setup mic input
 function setup() {
-  // put setup code here
-  createCanvas(0,0);
+  
+  // Create canvas for p5js canvas
+  createCanvas(displayWidth, displayHeight);
 
+  // Initialize serial communication
   serial = new p5.SerialPort(); // make a new instance of the serialport library
   serial.on('list', printList); // set a callback function for the serialport list event
   serial.on('connected', serverConnected); // callback for connecting to the server
@@ -46,19 +47,26 @@ function setup() {
   //serial.list(); // list the serial ports
   serial.open(portName); // open a serial port
 
-  videoCrack = createVideo("assets/video/Crack.mp4");
+  // Load video
+  //videoCrack = createVideo("assets/video/Crack.mp4");
+  for (var i = 0; i < 4; i++) {
+    videos[i] = createVideo("assets/video/crack"+[i+1]+".mov");
+    videos[i].hide();
+  }
 
-  videoCrack.pause();
+  //videoCrack.pause();
 
+  // Load data from JSON
   textSize(28);
   data = data.phrases;
   // print(data);
-  createCanvas(displayWidth, displayHeight);
-  // Create objects
+  
+  // Create objects for jittered textboxes
   for (var i = 0; i < 9; i++) {
     textbox.push( new Jitter(data[i])  );
   }
 
+  // Initialize sound input
   mic = new p5.AudioIn()
   mic.start();
 
@@ -76,30 +84,84 @@ function printList(portList) {
 function draw() {
   // put drawing code here
 
-  if (xPos > 0 || yPos > 0 || (zPos < 40 && zPos > 30)) {
-  	videoCrack.play();
-  	playing = true;
+  //sensorsInput();
+  console.log(valueSensorTouchRight, valueSensorTouchLeft);
+
+  sensorsInput();
+
+  if (stateVideo === 1) {
+
   } else {
-  	videoCrack.pause();
-  	playing = false;
+  	playTheVideo();
   }
 
+  // Draw jittered textboxes
   background(255, 255, 255, 0);
-  for (var i = 0; i < textbox.length; i++) {
-    textbox[i].move();
-    textbox[i].display();
-  }
+  drawJitteredText();
 
+  // Draw "Shout Louder" Text
   push();
   shoutLouder();
   pop();
 
 }
 
+function playTheVideo() {
+
+  //sensorsInput();
+  
+  image(videos[indexVideo],0,0,windowWidth,windowHeight);
+
+
+  var isPlaying = videos[indexVideo].currentTime > 0 && !videos[indexVideo].paused && !video[indexVideo].ended 
+    && video[indexVideo].readyState > 2;
+
+    if (!isPlaying) {
+      videos[indexVideo].play();
+      videos[indexVideo].onended(videoOver); //when video ends, call videoOver to return to first screen
+    }
+}
+
+function sensorsInput() {
+  //console.log(valueSensorTouchLeft, valueSensorTouchRight, valueSensorDistance);
+  console.log(indexVideo);
+
+    if (stateVideo === 1 && indexVideo < videos.length) {
+
+
+        if (valueSensorTouchLeft > 0 || valueSensorTouchRight > 0 || (valueSensorDistance < 40 && valueSensorDistance > 30)) {
+        //accepted
+        //pick random video from array
+        // for (var i = 0; i <= videos.length; i++) {
+        //  indexVideo += 1;
+        // }
+
+        // indexVideo = 0;
+
+        // if (indexVideo < videos.length) {
+        //  indexVideo = indexVideo+1;
+        // }
+
+        indexVideo = indexVideo+1; 
+        console.log(indexVideo);
+        console.log(videos.length);
+        stateVideo = 2;
+     } 
+
+    }
+}
+
+function videoOver() {
+    console.log("stopping video now"); 
+    videos[indexVideo].stop();
+    videos[indexVideo].hide();
+    stateVideo = 1;
+}
+
 function shoutLouder() {
   micLevel = mic.getLevel();
 
-  console.log(micLevel);
+  //console.log(micLevel);
 
   if (micLevel < 1 && micLevel > 0.1) {
 
@@ -134,6 +196,13 @@ function sendTextUp(){
     let ran = int(random(0, availableText.length));
 
     textbox[availableText[ran]].go();
+  }
+}
+
+function drawJitteredText() {
+  for (var i = 0; i < textbox.length; i++) {
+    textbox[i].move();
+    textbox[i].display();
   }
 }
 
@@ -188,15 +257,12 @@ function serialEvent() {
   var data = serial.readLine();
 
   if (data.length > 0) {
-    console.log(data);
+    //console.log(data);
     var sensors = split(data, ",");
     
-    xPos = int(sensors[0]);
-    yPos = int(sensors[1]);
-    zPos = int(sensors[2]);
-    //console.log(touched, xPos, vidCounter);
-    
-    //circleSize = int(data);
+    valueSensorTouchLeft = int(sensors[0]);
+    valueSensorTouchRight = int(sensors[1]);
+    valueSensorDistance = int(sensors[2]);
   }
 }
 
