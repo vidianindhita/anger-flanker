@@ -84,8 +84,10 @@ function printList(portList) {
 function draw() {
   // put drawing code here
 
+  background(255, 255, 255);
+
   //sensorsInput();
-  console.log(valueSensorTouchRight, valueSensorTouchLeft);
+  //console.log(valueSensorTouchRight, valueSensorTouchLeft);
 
   sensorsInput();
 
@@ -96,7 +98,7 @@ function draw() {
   }
 
   // Draw jittered textboxes
-  background(255, 255, 255, 0);
+  
   drawJitteredText();
 
   // Draw "Shout Louder" Text
@@ -124,9 +126,9 @@ function playTheVideo() {
 
 function sensorsInput() {
   //console.log(valueSensorTouchLeft, valueSensorTouchRight, valueSensorDistance);
-  console.log(indexVideo);
+  //console.log(indexVideo);
 
-    if (stateVideo === 1 && indexVideo < videos.length) {
+    if (stateVideo === 1 && indexVideo < videos.length - 1) {
 
 
         if (valueSensorTouchLeft > 0 || valueSensorTouchRight > 0 || (valueSensorDistance < 40 && valueSensorDistance > 30)) {
