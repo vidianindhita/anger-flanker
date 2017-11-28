@@ -1,0 +1,32 @@
+{
+    "description": "List of phrases",
+    "phrases": [
+        {
+            "phrase": "Passive aggressive people"
+        },
+        {
+            "phrase": "Horrible boss"
+        },
+        {
+            "phrase": "Hate speech"
+        },
+        {
+            "phrase": "Divisive Tweet"
+        },
+        {
+            "phrase": "Feeling of isolation"
+        },
+        {
+            "phrase": "Existential dread"
+        },
+        {
+            "phrase": "Unrequited Love"
+        },
+        {
+            "phrase": "Paralyzing anxiety"
+        },
+      	 {
+            "phrase": "Unsafe Spaces"
+        }
+    ]
+}
