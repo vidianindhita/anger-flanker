@@ -17,11 +17,14 @@ var textbox = []; // array of Jitter objects
 var x, y;
 var paragraph;
 var data;
-let other = true;
+var other = true;
 
 // Mic Input
 var mic;
 
+function preload() {
+  shoutCloud = loadImage("assets/image/shout.png");
+}
 
 // Preload function to load texts from JSON
 /*function preload(){
@@ -49,7 +52,7 @@ function setup() {
 
   // Load video
   //videoCrack = createVideo("assets/video/crack1.mp4");
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < 27; i++) {
  
 
     // videos[i] = document.getElementById("video"+String(indexVideo));
@@ -71,6 +74,8 @@ function setup() {
   // Initialize sound input
   mic = new p5.AudioIn()
   mic.start();
+
+  //setInterval(triggerSend, 1000);
 
 }
 
@@ -110,6 +115,8 @@ function draw() {
 
   image(videos[indexVideo],0,0,windowWidth,windowHeight);
 
+  // image(shoutCloud, mouseX, mouseY);
+
   // Draw jittered textboxes
   
   drawJitteredText();
@@ -124,56 +131,35 @@ function draw() {
 let prevPlaying = -1;
 function playTheVideo() {
 
-  //sensorsInput();
-
-  
-  // image(videos[indexVideo],0,0,windowWidth,windowHeight);
-  // console.log(videos[indexVideo]);
   let tempv = document.getElementById("video"+String(indexVideo)) ;
-  // console.log(tempv.currentTime, tempv.paused, tempv.ended, tempv.readyState);
+  
   var isPlaying = tempv.currentTime > 0 && !tempv.paused && !tempv.ended 
     && tempv.readyState > 2;
   
   console.log(indexVideo, isPlaying);
 
-  // var isPlaying = videos[indexVideo].currentTime > 0 && !videos[indexVideo].paused && !video[indexVideo].ended 
-  //   && video[indexVideo].readyState > 2;
-
-    if (!isPlaying && indexVideo != prevPlaying) {
-      videos[indexVideo].play();
-      prevPlaying = indexVideo;
-      stateVideo = 1;
-    }
+  if (!isPlaying && indexVideo != prevPlaying) {
+    videos[indexVideo].play();
+    prevPlaying = indexVideo;
+    stateVideo = 1;
+    triggerSend();
+  }
 
 }
 
 let lastMeasurement = 0;
 function sensorsInput() {
-  //console.log(valueSensorTouchLeft, valueSensorTouchRight);
-  //console.log(indexVideo);
+
     if (stateVideo === 1 && indexVideo < videos.length - 1) {
-        // console.log("checking sensor and old video stopped");
 
-
-        if ((valueSensorTouchLeft > 0 || valueSensorTouchRight > 0) && lastMeasurement == 0) {
-          //accepted
-          //pick random video from array
-          // for (var i = 0; i <= videos.length; i++) {
-          //  indexVideo += 1;
-          // }
-
-          // indexVideo = 0;
-
-          // if (indexVideo < videos.length) {
-          //  indexVideo = indexVideo+1;
-          // }
+        if ((valueSensorTouchLeft > 20 || valueSensorTouchRight > 20) && lastMeasurement == 0) {
 
           indexVideo = indexVideo+1; 
           console.log(indexVideo);
           console.log(videos.length);
           stateVideo = 2;
           lastMeasurement = 1;
-       } else if(valueSensorTouchLeft <= 0 && valueSensorTouchRight <= 0) {
+       } else if(valueSensorTouchLeft <= 20 && valueSensorTouchRight <= 20) {
           lastMeasurement = 0;
        }
 
@@ -192,37 +178,29 @@ function shoutLouder() {
 
   //console.log(micLevel);
 
-  if (micLevel < 2 && micLevel > 0.5) {
+  if (micLevel < 0.005 && micLevel > 0.001) {
 
     fill(255);
     textSize(75);
     text("SCREAM LOUDER!",width/4, constrain(height-micLevel*height*1, -0, height));
+    image(shoutCloud, width/4, constrain(height-micLevel*height*1, -0, height));
+  } else if (micLevel < 0.01 && micLevel > 0.006) {
+    fill(255);
+    textSize(75);
+    text("Not That Loud",width/4, constrain(height-micLevel*height*1, -0, height));
+    image(shoutCloud, width/4, constrain(height-micLevel*height*1, -0, height));
   }
   
 }
 
-function mousePressed(){
-  //interval between hits
+function triggerSend() {
   if(other){
     sendTextUp();
     other = false;
   }else{
     other = true;
   }
-
-  clear();
 }
-
-// function pushTextInterval() {
-//   if(other && (frameCount % 120 == 0)){
-//     sendTextUp();
-//     other = false;
-//   }else{
-//     other = true;
-//   }
-
-//   clear();
-// }
 
 function sendTextUp(){
   let availableText = [];
@@ -246,14 +224,13 @@ function drawJitteredText() {
   }
 }
 
-
 // Jitter class
 class Jitter {
   constructor(phrase){
 
     this.x = random(100, width-100);
     //starting point
-    this.y = height+40;
+    this.y = height+500;
     this.phrase = phrase.phrase;
     //character size
     this.w = 10 * this.phrase.length ;
@@ -269,7 +246,7 @@ class Jitter {
       this.y -= 2;
       if(this.y < 0){
         this.x = random(100, width-150);
-        this.y = height+50;
+        this.y = height+300;
         this.available = true;
         
       }
@@ -289,6 +266,14 @@ class Jitter {
   }
 }
 
+// function resetGame() {
+
+// }
+
+// function showMessages() {
+
+// }
+
 function serverConnected() {
   console.log('connected to server.');
 }
@@ -301,7 +286,7 @@ function serialEvent() {
   var data = serial.readLine();
 
   if (data.length > 0) {
-    //console.log(data);
+    console.log(data);
     var sensors = split(data, ",");
     
     valueSensorTouchLeft = int(sensors[0]);
