@@ -141,7 +141,7 @@ function sensorsInput() {
           lastMeasurement = 0;
        } 
 
-       if (valueSensorTouchFoot > 50 && indexVideo == videos.length - 1) {
+       if (valueSensorTouchFoot > 500 && indexVideo == videos.length - 1) {
           window.location.reload(true);
        }
 
