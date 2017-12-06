@@ -22,14 +22,17 @@ var other = true;
 // Mic Input
 var mic;
 
-function preload() {
-  shoutCloud = loadImage("assets/image/shout.png");
-}
+// Play State
+let prevPlaying = -1;
 
-// Preload function to load texts from JSON
-/*function preload(){
-  data = loadJSON("phrases.json"); 
-}*/
+// Check last video
+let lastMeasurement = 0;
+
+function preload() {
+  shoutCloud1 = loadImage("assets/image/screaming1.png");
+  shoutCloud2 = loadImage("assets/image/screaming2.png");
+  shoutCloud3 = loadImage("assets/image/screaming3.png");
+}
 
 // Setup function
 // to setup serial communication, load video, load data, and setup mic input
@@ -38,16 +41,6 @@ function setup() {
   // Create canvas for p5js canvas
   createCanvas(windowWidth, windowHeight);
 
-  resetGame();
-
-}
-
-function mousePressed() {
-  resetGame();
-  indexVideo = 0;
-}
-
-function resetGame() {
   // Initialize serial communication
   serial = new p5.SerialPort(); // make a new instance of the serialport library
   serial.on('list', printList); // set a callback function for the serialport list event
@@ -61,8 +54,7 @@ function resetGame() {
   serial.open(portName); // open a serial port
 
   // Load video
-  for (var i = 0; i < 27; i++) {
- 
+  for (var i = 0; i < 21; i++) {
     videos[i] = createVideo("assets/video/crack"+[i]+".mp4");
     videos[i].hide();
     videos[i].id("video"+String(i));
@@ -75,14 +67,10 @@ function resetGame() {
   // Initialize sound input
   mic = new p5.AudioIn()
   mic.start();
-
-  //setInterval(triggerSend, 1000);
-
 }
 
 function dataLoaded(loadedData) {
   data = loadedData['phrases'];
-  //console.log(data);
   // Create objects for jittered textboxes
   for (var i = 0; i < 9; i++) {
     textbox.push( new Jitter(data[i])  );
@@ -99,12 +87,10 @@ function printList(portList) {
 }
 
 function draw() {
-  // put drawing code here
 
   background(0, 0, 0);
 
   sensorsInput();
-  //triggerReset();
 
   if (stateVideo === 1) {
 
@@ -112,10 +98,10 @@ function draw() {
   	playTheVideo();
   }
 
+  // Draw videos
   image(videos[indexVideo],0,0,windowWidth,windowHeight);
 
   // Draw jittered textboxes
-  
   drawJitteredText();
 
   // Draw "Shout Louder" Text
@@ -124,9 +110,7 @@ function draw() {
   pop();
 }
 
-let prevPlaying = -1;
 function playTheVideo() {
-
   let tempv = document.getElementById("video"+String(indexVideo)) ;
   
   var isPlaying = tempv.currentTime > 0 && !tempv.paused && !tempv.ended 
@@ -140,10 +124,8 @@ function playTheVideo() {
     stateVideo = 1;
     triggerSend();
   }
-
 }
 
-let lastMeasurement = 0;
 function sensorsInput() {
 
     if (stateVideo === 1 && indexVideo < videos.length - 1) {
@@ -159,8 +141,7 @@ function sensorsInput() {
           lastMeasurement = 0;
        } 
 
-       if (valueSensorTouchFoot > 10 && indexVideo == videos.length - 1) {
-        console.log("valueSensorTouchFoot: ", valueSensorTouchFoot)
+       if (valueSensorTouchFoot > 50 && indexVideo == videos.length - 1) {
           window.location.reload(true);
        }
 
@@ -185,17 +166,12 @@ function shoutLouder() {
 
   //console.log(micLevel);
 
-  if (micLevel < 0.005 && micLevel > 0.001) {
-
-    fill(255);
-    textSize(75);
-    text("SCREAM LOUDER!",width/4, constrain(height-micLevel*height*1, -0, height));
-    image(shoutCloud, width/4, constrain(height-micLevel*height*1, -0, height));
-  } else if (micLevel < 0.01 && micLevel > 0.006) {
-    fill(255);
-    textSize(75);
-    text("Not That Loud",width/4, constrain(height-micLevel*height*1, -0, height));
-    image(shoutCloud, width/4, constrain(height-micLevel*height*1, -0, height));
+  if (micLevel > 0.3 && micLevel < 0.8) {
+    image(shoutCloud1, width/4, constrain(height-micLevel*height*1, -0, height));
+  } else if (micLevel > 0.81 && micLevel < 1.5) {
+    image(shoutCloud2, width/4, constrain(height-micLevel*height*1, -0, height));
+  } else if (micLevel > 1.5 && micLevel < 20.0) {
+    image(shoutCloud3, width/4, constrain(height-micLevel*height*1, -0, height));
   }
   
 }
@@ -224,7 +200,6 @@ function sendTextUp(){
 }
 
 function drawJitteredText() {
-  //pushTextInterval();
   for (var i = 0; i < textbox.length; i++) {
     textbox[i].move();
     textbox[i].display();
