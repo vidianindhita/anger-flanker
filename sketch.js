@@ -130,7 +130,7 @@ function sensorsInput() {
 
     if (stateVideo === 1 && indexVideo < videos.length - 1) {
 
-        if ((valueSensorTouchLeft > 20 || valueSensorTouchRight > 20) && lastMeasurement == 0) {
+      if ((valueSensorTouchLeft > 20 || valueSensorTouchRight > 20) && lastMeasurement == 0) {
 
           indexVideo = indexVideo+1; 
           console.log(indexVideo);
@@ -166,12 +166,12 @@ function shoutLouder() {
 
   //console.log(micLevel);
 
-  if (micLevel > 0.3 && micLevel < 0.8) {
-    image(shoutCloud1, width/4, constrain(height-micLevel*height*1, -0, height));
-  } else if (micLevel > 0.81 && micLevel < 1.5) {
-    image(shoutCloud2, width/4, constrain(height-micLevel*height*1, -0, height));
-  } else if (micLevel > 1.5 && micLevel < 20.0) {
-    image(shoutCloud3, width/4, constrain(height-micLevel*height*1, -0, height));
+  if (micLevel > 0.4 && micLevel < 0.7) {
+    image(shoutCloud1, width/10, constrain(height-micLevel*height*1, -0, height));
+  } else if (micLevel > 0.71 && micLevel < 1.0) {
+    image(shoutCloud2, width/10, constrain(height-micLevel*height*1, -0, height));
+  } else if (micLevel > 1.01 && micLevel < 20.0) {
+    image(shoutCloud3, width/10, constrain(height-micLevel*height*1, -0, height));
   }
   
 }
