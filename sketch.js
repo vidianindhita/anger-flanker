@@ -28,6 +28,12 @@ let prevPlaying = -1;
 // Check last video
 let lastMeasurement = 0;
 
+var pressStart;
+var pressEnd;
+var duration;
+var isPressing = false;
+var prevPressing = true;
+
 function preload() {
   shoutCloud1 = loadImage("assets/image/screaming1.png");
   shoutCloud2 = loadImage("assets/image/screaming2.png");
@@ -130,15 +136,31 @@ function sensorsInput() {
 
     if (stateVideo === 1 && indexVideo < videos.length - 1) {
 
-      if ((valueSensorTouchLeft > 20 || valueSensorTouchRight > 20) && lastMeasurement == 0) {
+      if ((valueSensorTouchLeft > 400 || valueSensorTouchRight > 400) && lastMeasurement == 0) {
+          if (prevPressing == false) {
+            pressStart = millis();
+            prevPressing = true;
+          }
+          
+          duration = pressStart - pressEnd;
+          if (duration > 500){
+            indexVideo = indexVideo+1; 
+            console.log(indexVideo);
+            console.log(videos.length);
+            stateVideo = 2;
+            lastMeasurement = 1;
 
-          indexVideo = indexVideo+1; 
-          console.log(indexVideo);
-          console.log(videos.length);
-          stateVideo = 2;
-          lastMeasurement = 1;
-       } else if(valueSensorTouchLeft <= 20 && valueSensorTouchRight <= 20) {
+
+          }
+       } else if(valueSensorTouchLeft <= 400 && valueSensorTouchRight <= 400) {
           lastMeasurement = 0;
+          
+          //if previous state is playing
+          if (prevPressing == true){
+          pressEnd = millis();
+          prevPressing = false;
+        }
+
        } 
 
        if (valueSensorTouchFoot > 500 && indexVideo == videos.length - 1) {
@@ -166,11 +188,11 @@ function shoutLouder() {
 
   //console.log(micLevel);
 
-  if (micLevel > 0.4 && micLevel < 0.7) {
+  if (micLevel > 0.3 && micLevel < 0.45) {
     image(shoutCloud1, width/10, constrain(height-micLevel*height*1, -0, height));
-  } else if (micLevel > 0.71 && micLevel < 1.0) {
+  } else if (micLevel > 0.46 && micLevel < 0.6) {
     image(shoutCloud2, width/10, constrain(height-micLevel*height*1, -0, height));
-  } else if (micLevel > 1.01 && micLevel < 20.0) {
+  } else if (micLevel > 0.61 && micLevel < 20.0) {
     image(shoutCloud3, width/10, constrain(height-micLevel*height*1, -0, height));
   }
   
