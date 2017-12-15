@@ -28,6 +28,7 @@ let prevPlaying = -1;
 // Check last video
 let lastMeasurement = 0;
 
+// Differebtiate between smashing and pressing
 var pressStart;
 var pressEnd;
 var duration;
@@ -60,7 +61,7 @@ function setup() {
   serial.open(portName); // open a serial port
 
   // Load video
-  for (var i = 0; i < 21; i++) {
+  for (var i = 0; i < 22; i++) {
     videos[i] = createVideo("assets/video/crack"+[i]+".mp4");
     videos[i].hide();
     videos[i].id("video"+String(i));
@@ -155,7 +156,6 @@ function sensorsInput() {
        } else if(valueSensorTouchLeft <= 400 && valueSensorTouchRight <= 400) {
           lastMeasurement = 0;
           
-          //if previous state is playing
           if (prevPressing == true){
           pressEnd = millis();
           prevPressing = false;
